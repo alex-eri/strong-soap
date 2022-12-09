@@ -636,10 +636,26 @@ class XMLHandler {
           refs[id] = {hrefs: [], object: null};
       }
 
+      var elementDescriptor = descriptor && descriptor.findElement(elementQName.name)
+      
+      // Try to find type escriptor in schema root if ns redefined
+      if (!elementDescriptor && attrs.xmlns) {
+        const schema = self.schemas[attrs.xmlns]
+        if (schema) {
+          var children = schema.children || [];
+          for (var child of children) {
+            if (child.$name === elementQName.name) {
+              elementDescriptor = child.describe()
+              break
+            }
+          }
+        }
+      }
+
       stack.push({
         name: elementQName.name,
         object: obj,
-        descriptor: descriptor && descriptor.findElement(elementQName.name),
+        descriptor: elementDescriptor,
         id: attrs.id,
       });
     };
